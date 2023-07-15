@@ -9,9 +9,8 @@ const useLanguage = (word) => {
 
     const { state } = useContext(Context);
     const language = state.userLanguage;
-
     if (language == 'en') return translation[word]?.en ?? '#'
-    else if (language == 'urdu') return translation[word]?.ur ?? '#'
+    else if (language == 'ur') return translation[word]?.ur ?? '#'
     else return en[word]?.en ?? '#'
 }
 

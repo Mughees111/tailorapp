@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import {
+  LogBox,
   PermissionsAndroid,
   SafeAreaView,
   ScrollView,
@@ -42,6 +43,10 @@ import { Provider } from './src/Context/DataContext';
 import BottomTabs from './src/screens/auth/BottomTabs';
 import MakeOrder from './src/screens/bottom/MakeOrder';
 import Page from './RecordAudio';
+import Loader from './src/components/Loader';
+import { retrieveItem } from './src/utils/functions';
+import CustomersList from './src/screens/bottom/CustomersList';
+import CustomerDetails from './src/screens/bottom/CustomerDetails';
 
 const Stack = createStackNavigator();
 
@@ -54,6 +59,8 @@ const AuthStack = () => (
 )
 
 
+LogBox.ignoreLogs(['VirtualizedLists should never be nested inside']);
+
 
 const App = () => {
 
@@ -63,6 +70,7 @@ const App = () => {
 
 
   const [loading, setLoading] = useState(false)
+  const [isLogined, setIsLogined] = useState(0); // 0 LOADING, 1 TRUE, 2 FALSE
 
 
 
@@ -102,9 +110,16 @@ const App = () => {
   }
 
 
+  function checkLogin() {
+    retrieveItem('loginInfo')
+      .then(data => {
+        if (data) setIsLogined(1)
+        else setIsLogined(2)
+      })
+  }
 
   React.useEffect(() => {
-
+    checkLogin()
     // googleSignIn();
     // PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_PHONE_NUMBERS)
     // DeviceInfo.getPhoneNumber().then((phoneNumber) => {
@@ -115,7 +130,7 @@ const App = () => {
 
 
 
-
+  if (isLogined == 0) return <Loader />
 
   return (
     // <Page />
@@ -123,12 +138,27 @@ const App = () => {
       <NavigationContainer
         ref={navigationRef}
       >
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-          <Stack.Screen name="AuthStack" component={AuthStack} />
-          <Stack.Screen name="BottomTabNavigator" component={BottomTabs} />
-          <Stack.Screen name="MakeOrder" component={MakeOrder} />
-        </Stack.Navigator>
+        {
+          isLogined == 1 ?
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="BottomTabNavigator" component={BottomTabs} />
+              <Stack.Screen name="MakeOrder" component={MakeOrder} />
+              <Stack.Screen name="CustomersList" component={CustomersList} />
+              <Stack.Screen name="CustomerDetails" component={CustomerDetails} />
+              <Stack.Screen name="AuthStack" component={AuthStack} />
+
+            </Stack.Navigator>
+            :
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="AuthStack" component={AuthStack} />
+              <Stack.Screen name="BottomTabNavigator" component={BottomTabs} />
+            </Stack.Navigator>
+
+        }
+
+
+
       </NavigationContainer>
     </Provider>
   )

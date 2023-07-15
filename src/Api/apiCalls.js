@@ -1,5 +1,5 @@
 const { urls } = require("../utils/Api_urls");
-import { doConsole } from "../utils/functions"
+import { doConsole, retrieveItem, storeItem } from "../utils/functions"
 
 async function doPost(body_data, url_plus) {
 
@@ -13,8 +13,8 @@ async function doPost(body_data, url_plus) {
     },
     body: JSON.stringify(body_data),
   })
-  .then((response) => response.json())
-  // .then((response) => response.text())
+    .then((response) => response.json())
+    // .then((response) => response.text())
     .then((responseJson) => {
       console.log(responseJson)
       return { isError: false, data: responseJson }
@@ -26,28 +26,39 @@ async function doPost(body_data, url_plus) {
   return { isError, data };
 }
 
-export async function postRequest(body_data, url_plus) {
-  
+async function getToken() {
+  const token = await retrieveItem('loginInfo');
+  return token?.api_logged_sess;
+}
+
+export async function postRequest(body_data, url_plus, content_type = 'application/json') {
+
+  body_data.token = await getToken() ?? '';
+  console.log('body_data', body_data)
   var url = urls.API + url_plus;
   // doConsole(" I request @ " + urls.API + url_plus);
   // doConsole(body_data);
   const configs = {
     method: 'POST',
     headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
+      Accept: content_type,
+      'Content-Type': content_type,
     },
-    body: JSON.stringify(body_data),
+    body: content_type == 'application/json' ? JSON.stringify(body_data) : body_data,
   }
   // console.log('configs')
   // console.log(configs)
-  console.log(url)
-  
+  console.log(url, configs)
+
   return (
     fetch(url, configs)
       .then((response) => response.json())
       // .then((response) => response.text())
       .then((responseJson) => {
+        console.log('responseJson',responseJson)
+        if (responseJson?.action == 'failed' && responseJson?.error?.toLowerCase() == 'Invalid login credentials') {
+          storeItem('loginInfo', {});
+        }
         return responseJson
       }).catch((error) => {
         console.log(error)

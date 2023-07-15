@@ -19,6 +19,7 @@ import { fonts } from '../../common/fonts';
 import { Context } from '../../Context/DataContext';
 import useColors from '../../hooks/useColors';
 import useLanguage from '../../hooks/useLanguage';
+import { signupApi } from '../../Api/methods';
 
 
 var alertRef;
@@ -42,12 +43,60 @@ const SignUp = () => {
 
     const colorScheme = useColorScheme()
 
+    function validateFeilds() {
+        if (username == '') {
+            alertRef.alertWithType('error', 'Error', 'Please enter a valid name');
+            return;
+        }
+        if (shopName == '') {
+            alertRef.alertWithType('error', 'Error', 'Please enter shop name');
+            return;
+        }
+        if (shopType == '') {
+            alertRef.alertWithType('error', 'Error', 'Please select shop type')
+            return;
+        }
+        if (phone == '') {
+            alertRef.alertWithType('error', 'Error', 'Please enter your phone number');
+            return;
+        }
+        if (password == '' || password.length < 8) {
+            alertRef.alertWithType('error', 'Error', 'Please enter a valid 8 digit password')
+            return;
+        }
+        doSignUp();
+        // navigate('BottomTabNavigator')
+
+    }
+
+    async function doSignUp() {
+        const body = {
+            name: username,
+            shop_name: shopName,
+            phone: phone,
+            email: email,
+            password: password,
+            tailor_type: shopType,
+        }
+        setLoading(true)
+        const response = await signupApi(body);
+        setLoading(false)
+        console.log('response === ', response);
+        if (response.action == 'failed') {
+            alertRef.alertWithType('error', 'Error', response.error);
+            return;
+        }
+        if (response.action == 'success') {
+            storeItem('loginInfo', response.data);
+            navigate('BottomTabNavigator');
+        }
+    }
 
 
-    useEffect(() => {
-        console.log('this is the change i want ', colorScheme);
-        setAppTheme(colorScheme)
-    }, [useColorScheme()])
+    // useEffect(() => {
+    //     console.log('this is the change i want ', colorScheme);
+    //     setAppTheme(colorScheme)
+    // }, [useColorScheme()])
 
 
     return (
@@ -56,24 +105,27 @@ const SignUp = () => {
                 backgroundColor={useColors('statusBar')}
                 barStyle={useColorScheme() == 'dark' ? 'light-content' : 'dark-content'}
             />
-            {loading && <Loader />}
-            <DropdownAlert ref={(ref) => alertRef = ref} />
-            <SafeAreaView style={{ marginTop: 60, width: "90%", alignSelf: 'center', }}>
+            
+            
+            <SafeAreaView style={{ marginTop: 10, width: "90%", alignSelf: 'center', }}>
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 160 }}>
                     <View style={{ marginTop: -15 }}>
                         <Text style={{ marginTop: 20, fontFamily: fonts.PBo, fontSize: 22, color: useColors('heading') }}> {useLanguage('createNewAccount')} </Text>
                         <Text style={{ marginTop: 3, fontFamily: fonts.PRe, fontSize: 16, color: useColors('white') }}>{useLanguage('enterDetailsToContinue')}</Text>
 
                         <CustomTextInput
-                            onChangeText={setUsername}
-                            placeholder={useLanguage('shopName')}
-                            style={{ marginTop: 20 }}
-                        />
-                        <CustomTextInput
+                            mandatory
                             onChangeText={setShopName}
-                            placeholder={useLanguage('name')}
-                            style={{ marginTop: 20 }}
+                            value={shopName}
+                            placeholder={useLanguage('shopName')}
+                        // containerStyle={{ marginTop: 20 }}
                         />
+
+                        <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                            <Text style={{ color: 'red' }}>*</Text>
+                            <Text style={{ fontSize: 12, color: useColors('white'), }}>{'Shop type'}</Text>
+                        </View>
+
                         <View style={{
                             width: "100%",
                             height: 42,
@@ -84,6 +136,8 @@ const SignUp = () => {
                             marginTop: 10,
                             alignItems: 'center', justifyContent: 'center'
                         }}>
+
+
                             <PrivacyPicker
                                 selected={{ title: "Shop type" }}
                                 data={[{ title: "Gents" }, { title: "Ladies" }, { title: "Both" }]}
@@ -93,18 +147,27 @@ const SignUp = () => {
                             />
                         </View>
                         <CustomTextInput
-                            onChangeText={setEmail}
-                            placeholder={useLanguage('email')}
-                            keyboardType={"email-address"}
-                            style={{ marginTop: 20 }}
-                        />
-                        <CustomTextInput
+                            mandatory
                             onChangeText={setPhone}
                             keyboardType={"numeric"}
                             placeholder={useLanguage('phoneNumber')}
-                            style={{ marginTop: 15, }}
+                        // containerStyle={{ marginTop: 15, }}
                         />
                         <CustomTextInput
+                            onChangeText={setUsername}
+                            placeholder={useLanguage('name')}
+                        // containerStyle={{ marginTop: 20 }}
+                        />
+
+                        <CustomTextInput
+                            onChangeText={setEmail}
+                            placeholder={useLanguage('email')}
+                            keyboardType={"email-address"}
+                        // containerStyle={{ marginTop: 20 }}
+                        />
+
+                        <CustomTextInput
+                            mandatory
                             onChangeText={setPassword}
                             placeholder={useLanguage('password')}
                             style={{ marginTop: 15, }}
@@ -112,6 +175,7 @@ const SignUp = () => {
 
                         />
                         <CustomTextInput
+                            mandatory
                             placeholder={useLanguage('cPassword')}
                             style={{ marginTop: 15, }}
                             onChangeText={setCPass}
@@ -119,8 +183,8 @@ const SignUp = () => {
                         />
                         <MainButton
                             text={useLanguage('next')}
-                            btnStyle={{ marginTop: 60 }}
-                            onPress={() => navigate('BottomTabNavigator')}
+                            btnStyle={{ marginTop: 20 }}
+                            onPress={() => validateFeilds()}
                         />
                         <Text style={{ alignSelf: 'center', fontSize: 16, color: useColors('white'), marginTop: 15, fontFamily: 'PMe' }}>{useLanguage('orContinueWith')}</Text>
                         <View style={{ alignSelf: 'center', flexDirection: 'row', marginTop: 15 }}>
@@ -151,8 +215,8 @@ const SignUp = () => {
 
 
             </SafeAreaView>
-
-
+            {loading && <Loader />}
+            <DropdownAlert ref={(ref) => alertRef = ref} />
 
         </View>
     )

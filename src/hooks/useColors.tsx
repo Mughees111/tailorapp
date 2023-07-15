@@ -47,7 +47,8 @@ const useColors = (props: any) => {
         switchThumbOf: "grey",
         switchTrackOn: "grey",
         switchTrackOf: "white",
-        textInputBorder: "rgba(255,255,255,0.4)"
+        textInputBorder: "rgba(255,255,255,0.4)",
+        placeHolder: 'rgba(255,255,255,0.4)'
     }
 
     const colorsLight = {
@@ -71,7 +72,9 @@ const useColors = (props: any) => {
         switchThumbOf: "grey",
         switchTrackOn: "grey",
         switchTrackOf: "white",
-        textInputBorder: "rgba(0,0,0,0.5)"
+        textInputBorder: "rgba(0,0,0,0.5)",
+        placeHolder: 'rgba(0,0,0,0.5)"',
+
     }
 
     if (state.theme == 'dark') return colorsDark[props] ?? '#111'

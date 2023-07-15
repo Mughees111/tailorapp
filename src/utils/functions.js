@@ -5,11 +5,26 @@ import { Share } from 'react-native';
 import { urls } from './Api_urls';
 import { navigate } from '../../Navigations';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 
+export const months = [
+  "January", "February", "March", "April", "May", "June", "July",
+  "August", "September", "October", "November", "December"
+];
+export const weekDays = [
+  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
+]
+
+export const getDayName = (dateObj) => {
+  const date = new Date(dateObj);
+  const options = { weekday: 'long' };
+  const dayName = date.toLocaleDateString('en-US', options).split(',')[0];
+  return dayName;
+}
 
 // local storage function that retreives the data
-async function retrieveItem(key) {
+export async function retrieveItem(key) {
   try {
     const retrievedItem = await AsyncStorage.getItem(key);
     const item = JSON.parse(retrievedItem);
@@ -105,6 +120,7 @@ const onShare = async (msg) => {
 };
 
 
+
 function getParamFromURL(query) {
   var vars = query.split("&");
   var query_string = {};
@@ -130,36 +146,89 @@ function getParamFromURL(query) {
 export function formatDate(dateObj) {
   var month = dateObj.getMonth() + 1;
   if (month < 10) {
-      month = "0" + month;
-      if (dateObj.getDate() < 10) {
-          const dat = "0" + dateObj.getDate();
-          let date = dateObj.getFullYear() + "-" + month + "-" + dat;
-          return date
-      }
-      else {
-          let date = dateObj.getFullYear() + "-" + month + "-" + dateObj.getDate();
-          return date
-      }
+    month = "0" + month;
+    if (dateObj.getDate() < 10) {
+      const dat = "0" + dateObj.getDate();
+      let date = dateObj.getFullYear() + "-" + month + "-" + dat;
+      return date
+    }
+    else {
+      let date = dateObj.getFullYear() + "-" + month + "-" + dateObj.getDate();
+      return date
+    }
   }
   else {
-      if (dateObj.getDate() < 10) {
-          const dat = "0" + dateObj.getDate()
-          let date = dateObj.getFullYear() + "-" + month + "-" + dat
-          return date
-      }
-      else {
-          let date = dateObj.getFullYear() + "-" + month + "-" + dateObj.getDate()
-          return date
-      }
+    if (dateObj.getDate() < 10) {
+      const dat = "0" + dateObj.getDate()
+      let date = dateObj.getFullYear() + "-" + month + "-" + dat
+      return date
+    }
+    else {
+      let date = dateObj.getFullYear() + "-" + month + "-" + dateObj.getDate()
+      return date
+    }
 
   }
 }
+
+export function jsDateObjToStandard(v) {
+  if (v) {
+    const dateObj = new Date(v);
+    const year = dateObj.getUTCFullYear();
+    const month = ('0' + (dateObj.getUTCMonth() + 1)).slice(-2);
+    const day = ('0' + dateObj.getUTCDate()).slice(-2);
+    const hours = ('0' + dateObj.getUTCHours()).slice(-2);
+    const minutes = ('0' + dateObj.getUTCMinutes()).slice(-2);
+    const seconds = ('0' + dateObj.getUTCSeconds()).slice(-2);
+    const standardDateTime = `${hours}:${minutes}, ${day}-${month}-${year}`;
+    return standardDateTime
+  }
+}
+
+function generateRandomKey(uri) {
+  let shortUrl = uri.substring(uri.length - 4, uri.length - 10);
+  const randomNum = Math.floor(Math.random() * Math.pow(10, 15));
+  const keyString = randomNum.toString().padStart(15, '0') + shortUrl;
+  return keyString;
+}
+
+
+export async function uploadSingleFile() {
+  try {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+
+    })
+    let res = result.assets[0];
+    console.log('res===', res)
+    let type = res?.type?.split('/');
+    const photo = {
+      uri: res?.uri,
+      type: res?.type,
+      name: generateRandomKey(res?.uri) + "." + type[1]
+      // name: generateRandomKey+type[1]},
+    };
+
+    return photo;
+    // setGallaryUploadedImgs(results)
+  } catch (err) {
+    return {
+      errror: "Unknown Error: " + JSON.stringify(err)
+
+
+    }
+  }
+}
+
 
 
 // common Navigations
 
 module.exports.storeItem = storeItem;
-module.exports.retrieveItem = retrieveItem;
 module.exports.doConsole = doConsole;
 module.exports.validateEmail = validateEmail;
 module.exports.doAlertPlease = doAlertPlease;

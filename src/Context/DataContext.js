@@ -14,6 +14,8 @@ const dataReducer = (state, action) => {
             return { ...state, userLanguage: action.payload }
         case 'changeAppTheme':
             return { ...state, theme: action.payload }
+        case 'setCustomers':
+            return { ...state, customers: action.payload }
 
         default: return state
     }
@@ -46,19 +48,28 @@ const setUserLanguage = dispatch => {
     }
 }
 
+const setCustomersGlobal = dispatch => {
+    return (data) => {
+        console.log('data===asdasd',data)
+        dispatch({ type: 'setCustomers', payload: data })
+    }
+}
+
 
 export const { Provider, Context } = createDataContext(
     dataReducer,
     {
         setUserGlobal,
         setUserLocationGlobal,
-        setAppTheme
+        setAppTheme,
+        setCustomersGlobal
 
     },
     {
         userData: [],
         userLocation: {},
         userLanguage: 'en',
-        theme: 'light'
+        theme: 'light',
+        customers: []
     }
 )

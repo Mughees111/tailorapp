@@ -1,6 +1,6 @@
 export const urls = {
-  API: "http://192.168.68.56:3000/api/",
-  Image_Uri: "192.168.68.56:3000/api/",
+  API: "http://192.168.20.56:3000/api/",
+  Image_Uri: "http://192.168.20.56:3000/api/",
 
 
   error_title: "No Internet",

@@ -219,6 +219,18 @@ export const translation = {
     },
     shopName: {
         en: 'Shop name'
+    },
+    customerList: {
+        en : "Customer List"
+    },
+    customerDetails: {
+        en : "Customer Details"
+    },
+    createdAt : {
+        en: "Created at"
+    },
+    deliveryDate : {
+        en : "Delivery date",
     }
 
 }
